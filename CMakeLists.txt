@@ -1,0 +1,22 @@
+cmake_minimum_required (VERSION 2.6)
+project(NavioSDK CXX)
+
+add_definitions("-Wall")
+
+if (CMAKE_COMPILER_IS_GNUCXX)
+    EXECUTE_PROCESS(COMMAND ${CMAKE_CXX_COMPILER} "-dumpversion" OUTPUT_VARIABLE GCC_VERSION)
+    if (GCC_VERSION VERSION_GREATER 4.7 OR GCC_VERSION VERSION_EQUAL 4.7)
+        add_definitions("-std=c++11")
+    elseif(GCC_VERSION VERSION_GREATER 4.3 OR GCC_VERSION VERSION_EQUAL 4.3)
+        add_definitions("-std=gnu++0x")
+    else()
+        message(FATAL_ERROR "Your g++ compiller is too old. At least g++ 4.3 required")
+    endif ()
+elseif ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
+    add_definitions("-std=c++11 -stdlib=libc++")
+else()
+    message(FATAL_ERROR "Unknown c++ compiller.")
+endif()
+
+add_subdirectory(src)
+add_subdirectory(examples)
