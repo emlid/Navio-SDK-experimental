@@ -15,11 +15,14 @@ class I2C;
 class PCA9685
 {
 public:
+
+    /** Constructor with default address and eventloop. */
+    PCA9685();
     /** Constructor.
      * @param i2c - pointer to i2c driver instance.
      * @param address - pca9685 i2c address.
      */
-    PCA9685(I2C *i2c, uint8_t address=PCA9685_I2C_DEFAULT_ADDR);
+    PCA9685(uint8_t address, I2C *i2c);
     PCA9685(const PCA9685& that) = delete; /**< Copy contructor not allowed because of sensor state. */
     ~PCA9685();
 

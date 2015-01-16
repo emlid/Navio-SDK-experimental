@@ -8,13 +8,22 @@
 #include <fcntl.h>
 #include <cassert>
 
+static I2C* _default_i2c = nullptr;
+
 I2C::I2C():
     _fd(-1)
 {
+    if (_default_i2c == nullptr) {
+        _default_i2c = this;
+    }
 }
 
 I2C::~I2C()
 {
+    if (_default_i2c == this) {
+        _default_i2c = nullptr;
+    }
+
     if (_fd != -1) {
         close(_fd); _fd = -1;
     }
@@ -92,4 +101,10 @@ int I2C::readWrite(i2c_rdwr_ioctl_data &messages)
         return -1;
     }
     return 0;
+}
+
+I2C* I2C::getDefault()
+{
+    assert(_default_i2c != nullptr);
+    return _default_i2c;
 }

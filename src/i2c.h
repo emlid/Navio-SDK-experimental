@@ -33,15 +33,13 @@ public:
     I2C(const I2C& that) = delete;  /**< Copy contructor not allowed because of file descriptor. */
     ~I2C();
 
-    /**
-     * Open i2c block device.
+    /** Open i2c block device.
      * @param dev_path - path to dev
      * @return 0 on success or negative value on error
      */
     int openDevice(const char *dev_path);
 
-    /**
-     * Read byte from i2c device register.
+    /** Read byte from i2c device register.
      * @param device_address - i2c device address
      * @param register_address - i2c device register
      * @param data - data pointer
@@ -49,8 +47,7 @@ public:
      */
     int readByte(uint8_t device_address, uint8_t register_address, uint8_t *data);
 
-    /**
-     * Read bytes from i2c device register.
+    /** Read bytes from i2c device register.
      * @param device_address - i2c device address
      * @param register_address - i2c device register
      * @param size - variable size
@@ -59,8 +56,7 @@ public:
      */
     int readBytes(uint8_t device_address, uint8_t register_address, uint8_t size, uint8_t *data);
 
-    /**
-     * Write bytes to the i2c device register.
+    /** Write bytes to the i2c device register.
      * @param device_address - i2c device address
      * @param register_address - i2c device register
      * @param data - data pointer
@@ -68,8 +64,7 @@ public:
      */
     int writeByte(uint8_t device_address, uint8_t register_address, uint8_t *data);
 
-    /**
-     * Write bytes to the i2c device register.
+    /** Write bytes to the i2c device register.
      * @param device_address - i2c device address
      * @param register_address - i2c device register
      * @param size - variable size
@@ -78,12 +73,16 @@ public:
      */
     int writeBytes(uint8_t device_address, uint8_t register_address, uint8_t size, uint8_t *data);
 
-    /**
-     * Send i2c messages bundle.
+    /** Send i2c messages bundle.
      * @param messages - i2c_rdwr_ioctl_data message pack. Read linux i2c documentation if you want to use it.
      * @return 0 on success or negative value on error
      */
     int readWrite(i2c_rdwr_ioctl_data &messages);
+
+    /** Get default instance.
+     * @return I2C default instance.
+     */
+    static I2C* getDefault();
 
 private:
     int _fd;

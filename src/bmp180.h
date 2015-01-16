@@ -43,12 +43,15 @@ public:
      */
     std::function<void(float, float)> onTemperatureAndPressure;
 
+    /** Constructor with default address, i2c bus and event loop. */
+    BMP180();
+
     /** Constructor.
      * @param event_poller - event poller instance, which will be used for event polling.
      * @param bus - but instance, where sensor located.
      * @param address - device address.
      */
-    BMP180(EventPoller *event_poller, I2C *bus, uint8_t address=BMP180_I2C_DEFAULT_ADDR);
+    BMP180(uint8_t address, I2C *bus, EventPoller *event_poller);
     BMP180(const BMP180& that) = delete; /**< Copy contructor not allowed because of sensor state and timers. */
     ~BMP180();
 

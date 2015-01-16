@@ -73,7 +73,12 @@
 
 #define L3GD20H_AUTOINCREMENT           0x80
 
-L3GD20H::L3GD20H(EventPoller *event_poller, I2C *bus, uint8_t address):
+L3GD20H::L3GD20H():
+    L3GD20H(L3GD20H_DEFAULT_ADDRESS, I2C::getDefault(), EventPoller::getDefault())
+{
+}
+
+L3GD20H::L3GD20H(uint8_t address, I2C *bus, EventPoller *event_poller):
     _state(NotReady), _i2c(bus), _timer(new Timer(event_poller)),
     _address(address), _range(L3GD20H_RANGE_245)
 {

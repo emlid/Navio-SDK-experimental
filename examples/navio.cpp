@@ -14,8 +14,8 @@ float wtfround(float number, float precision) {
 int main(int argc, char **argv) {
     EventPoller ep;
     I2C         i2c;
-    PCA9685     pwm(&i2c);
-    Timer       pwm_timer(&ep), stats_timer(&ep);
+    PCA9685     pwm;
+    Timer       pwm_timer, stats_timer;
     float       pwm_value = 0;
 
     Info() << "Initializing I2C";
@@ -25,7 +25,7 @@ int main(int argc, char **argv) {
     }
 
     Info() << "Initializing sensors";
-    if (pwm.initialize() < 0) {
+    if (pwm.initialize(24576000.0f) < 0) {
         Error() << "Unable to initialize PCA9685";
         return 255;
     }
@@ -35,9 +35,8 @@ int main(int argc, char **argv) {
     pwm_timer.callback = [&](){
         pwm_value += 2;
         pwm.setPWM(0, (powf((sinf(pwm_value * PI/180)+1)/2, 2)) * 4096);
-        pwm.setPWM(1, (powf((sinf((pwm_value+45) * PI/180)+1)/2, 2)) * 4096);
-        pwm.setPWM(2, (powf((sinf((pwm_value+90) * PI/180)+1)/2, 2)) * 4096);
-        pwm.setPWM(3, (powf((sinf((pwm_value+130) * PI/180)+1)/2, 2)) * 4096);
+        pwm.setPWM(1, (powf((sinf((pwm_value+60) * PI/180)+1)/2, 2)) * 4096);
+        pwm.setPWM(2, (powf((sinf((pwm_value+120) * PI/180)+1)/2, 2)) * 4096);
         if (pwm_value > 360) pwm_value -= 360;
     };
     pwm_timer.start(16);
@@ -57,7 +56,7 @@ int main(int argc, char **argv) {
     stats_timer.start(5000, 5000);
 
     Info() << "Polling events";
-    ep.pollEvents();
+    ep.loop();
 
     return 0;
 }

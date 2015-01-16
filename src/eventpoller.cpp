@@ -9,9 +9,12 @@
 #include <cassert>
 #include <errno.h>
 
+static EventPoller *_default_event_poller=nullptr;
+
 EventPoller::EventPoller():
     _epoll_mono_time(0), _callback_mono_time(0), _epoll_cpu_time(0), _callback_cpu_time(0),
-    _fd(-1), _fd_read_pool(), _fd_write_pool()
+    _fd(-1), _run(false),
+    _fd_read_pool(), _fd_write_pool()
 {
     _fd = epoll_create(1);
     assert(_fd >= 0);
@@ -20,6 +23,10 @@ EventPoller::EventPoller():
     schedparm.sched_priority = sched_get_priority_min(SCHED_FIFO);
     if (schedparm.sched_priority == -1 || sched_setscheduler(0, SCHED_FIFO, &schedparm) == -1) {
         Error() << "Unable to set scheduller priority. Events may coalesce.";
+    }
+
+    if (_default_event_poller == nullptr) {
+        _default_event_poller = this;
     }
 }
 
@@ -33,13 +40,14 @@ EventPoller::~EventPoller()
     }
 }
 
-void EventPoller::pollEvents()
+void EventPoller::loop()
 {
     int count;
     timespec a_mono_time, b_mono_time, c_mono_time, a_cpu_time, b_cpu_time, c_cpu_time;
     epoll_event events[16];
 
-    while (true) {
+    _run = true;
+    while (_run) {
         clock_gettime(CLOCK_MONOTONIC, &a_mono_time);
         clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &a_cpu_time);
 
@@ -71,6 +79,12 @@ void EventPoller::pollEvents()
                                + (float)(c_cpu_time.tv_nsec - b_cpu_time.tv_nsec) / 1000000);
     }
 }
+
+void EventPoller::stop()
+{
+    _run = false;
+}
+
 void EventPoller::getTimings(float &epoll_mono, float &callback_mono, float &epoll_cpu, float &callback_cpu)
 {
     epoll_mono = _epoll_mono_time;
@@ -78,6 +92,12 @@ void EventPoller::getTimings(float &epoll_mono, float &callback_mono, float &epo
     epoll_cpu = _epoll_cpu_time;
     callback_cpu = _callback_cpu_time;
     _epoll_mono_time = _callback_mono_time = _epoll_cpu_time = _callback_cpu_time = 0;
+}
+
+EventPoller* EventPoller::getDefault()
+{
+    assert(_default_event_poller != nullptr);
+    return _default_event_poller;
 }
 
 bool EventPoller::_registerFDRead(int fd, FDEvent *fd_event)

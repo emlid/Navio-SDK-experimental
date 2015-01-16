@@ -14,6 +14,7 @@ public:
      * @param event_poller - EventPoller instance which will be used to process events.
      */
     FDEvent(EventPoller *event_poller);
+    FDEvent(const FDEvent& that) = delete;  /**< Copy contructor not allowed because of the file descriptor. */
     virtual ~FDEvent();
 
 protected:

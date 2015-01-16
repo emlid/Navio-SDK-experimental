@@ -7,6 +7,12 @@
 #include <cassert>
 #include <errno.h>
 
+Timer::Timer():
+    Timer(EventPoller::getDefault())
+{
+
+}
+
 Timer::Timer(EventPoller *event_poller):
     FDEvent(event_poller), _state(Idle)
 {

@@ -1,6 +1,7 @@
 #ifndef TIMER_H
 #define TIMER_H
 
+#include "eventpoller.h"
 #include "fdevent.h"
 #include <time.h>
 #include <stdint.h>
@@ -17,10 +18,13 @@ class Timer: public FDEvent
     };
 
 public:
+    /** Timer constructor with default eventloop. */
+    Timer();
     /** Timer constructor.
      * @param event_poller - EventPoller instance which will be used to process events.
      */
     Timer(EventPoller *event_poller);
+    Timer(const Timer& that) = delete;  /**< Copy contructor not allowed because of internal state and file descriptor. */
     virtual ~Timer();
 
     /** User set callback. Will be called on timer timeout. */

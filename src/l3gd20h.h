@@ -37,7 +37,8 @@ class L3GD20H
 public:
     std::function<void(float, float, float)> onData;
 
-    L3GD20H(EventPoller *event_poller, I2C *bus, uint8_t address=L3GD20H_DEFAULT_ADDRESS);
+    L3GD20H();
+    L3GD20H(uint8_t address, I2C *bus, EventPoller *event_poller);
     ~L3GD20H();
 
     int initialize();

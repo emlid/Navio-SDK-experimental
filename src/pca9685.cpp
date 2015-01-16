@@ -32,7 +32,12 @@
 #define PCA9685_MODE2_OUTNE1_BIT    1
 #define PCA9685_MODE2_OUTNE0_BIT    0
 
-PCA9685::PCA9685(I2C *i2c, uint8_t address):
+PCA9685::PCA9685():
+    PCA9685(PCA9685_I2C_DEFAULT_ADDR, I2C::getDefault())
+{
+
+}
+PCA9685::PCA9685(uint8_t address, I2C *i2c):
     _i2c(i2c), _address(address), _frequency(0), _clock(25000000.f)
 {
     assert(i2c != nullptr);

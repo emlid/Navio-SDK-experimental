@@ -16,10 +16,10 @@ float wtfround(float number, float precision) {
 int main(int argc, char **argv) {
     EventPoller ep;
     I2C         i2c;
-    PCA9685     pwm(&i2c);
-    BMP180      barometer(&ep, &i2c);
-    L3GD20H     gyroscope(&ep, &i2c);
-    Timer       barometer_timer(&ep), pwm_timer(&ep), stats_timer(&ep);
+    PCA9685     pwm;
+    BMP180      barometer;
+    L3GD20H     gyroscope;
+    Timer       barometer_timer, pwm_timer, stats_timer;
 
     float       xa=0, ya=0, za=0;
     uint32_t    gc=0;
@@ -100,7 +100,7 @@ int main(int argc, char **argv) {
     stats_timer.start(5000, 5000);
 
     Info() << "Polling events";
-    ep.pollEvents();
+    ep.loop();
 
     return 0;
 }

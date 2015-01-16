@@ -25,7 +25,12 @@
 #define BMP180_RETRY                2000
 
 
-BMP180::BMP180(EventPoller *event_poller, I2C *bus, uint8_t address):
+BMP180::BMP180():
+    BMP180(BMP180_I2C_DEFAULT_ADDR, I2C::getDefault(), EventPoller::getDefault())
+{
+}
+
+BMP180::BMP180(uint8_t address, I2C *bus, EventPoller *event_poller):
     _state(NotReady), _i2c(bus), _timer(new Timer(event_poller)),
     _address(address),  _id(0), _oversampling(BMP180_OVERSAMPLING_SINGLE),
     _ac1(0), _ac2(0), _ac3(0), _ac4(0), _ac5(0), _ac6(0),
