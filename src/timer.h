@@ -7,7 +7,7 @@
 #include <stdint.h>
 #include <functional>
 
-/** FDTimer wrapper.
+/** Linux timerfd wrapper.
  *  Class provides event driven timers.
  */
 class Timer: public FDEvent

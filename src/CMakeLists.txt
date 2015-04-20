@@ -4,6 +4,7 @@ set(libnavio_src
     eventpoller.cpp
     fdevent.cpp
     timer.cpp
+    signal.cpp
     log.cpp
     i2c.cpp
     spi.cpp
