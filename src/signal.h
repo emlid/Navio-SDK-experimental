@@ -12,7 +12,7 @@ class Signal: public FDEvent
 {
 
 public:
-    std::function<void(void)> onSigint;
+    std::function<void(void)> onSIGINT;
 
     /** Timer constructor with default eventloop. */
     Signal();
@@ -23,6 +23,7 @@ public:
     Signal(const Signal& that) = delete;  /**< Copy contructor not allowed because of internal state and file descriptor. */
 
     virtual ~Signal();
+    virtual const char* name();
 
 protected:
     virtual void _onRead();

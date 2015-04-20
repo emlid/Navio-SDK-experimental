@@ -78,7 +78,7 @@ BMP180::BMP180(uint8_t address, I2C *bus, EventPoller *event_poller):
 
 BMP180::~BMP180()
 {
-    reset();
+    delete _timer; _timer = nullptr;
 }
 
 int BMP180::initialize()

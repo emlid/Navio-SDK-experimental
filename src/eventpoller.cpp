@@ -33,10 +33,14 @@ EventPoller::EventPoller():
 EventPoller::~EventPoller()
 {
     if (!_fd_read_pool.empty()) {
-        Error() << "Read event pool is not empty";
+        for (auto i=_fd_read_pool.begin(); i!=_fd_read_pool.end(); i++) {
+            Error()<< "fd:" << i->first << "holder:" << i->second->name() << "is still in read event pool.";
+        }
     }
     if (!_fd_write_pool.empty()) {
-        Error() << "Write event pool is not empty";
+        for (auto i=_fd_write_pool.begin(); i!=_fd_write_pool.end(); i++) {
+            Error()<< "fd:" << i->first << "holder:" << i->second->name() << "is still in write event pool.";
+        }
     }
 }
 

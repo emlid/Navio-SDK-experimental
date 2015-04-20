@@ -27,6 +27,8 @@ public:
     Timer(const Timer& that) = delete;  /**< Copy contructor not allowed because of internal state and file descriptor. */
     virtual ~Timer();
 
+    virtual const char* name();
+
     /** User set callback. Will be called on timer timeout. */
     std::function<void(void)> callback;
 

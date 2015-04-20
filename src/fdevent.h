@@ -16,6 +16,7 @@ public:
     FDEvent(EventPoller *event_poller);
     FDEvent(const FDEvent& that) = delete;  /**< Copy contructor not allowed because of the file descriptor. */
     virtual ~FDEvent();
+    virtual const char* name()=0;
 
 protected:
     EventPoller *_ep;   /**< Pointer to event poller. */

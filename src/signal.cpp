@@ -15,12 +15,12 @@ Signal::Signal():
 }
 
 Signal::Signal(EventPoller *event_poller):
-    FDEvent(event_poller)
+    FDEvent(event_poller), onSIGINT(nullptr)
 {
     sigset_t mask;
     sigfillset(&mask);
     if (sigprocmask(SIG_BLOCK, &mask, NULL) == -1) {
-        Error() << "Can not set process sognal mask";
+        Error() << "Can not set process signal mask";
     }
 
     _fd = signalfd(-1, &mask, SFD_NONBLOCK);
@@ -35,14 +35,19 @@ Signal::~Signal()
     close(_fd);
 }
 
+const char* Signal::name()
+{
+    return "Signal";
+}
+
 void Signal::_onRead()
 {
     signalfd_siginfo siginfo;
     if (read(_fd, &siginfo, sizeof(siginfo)) == sizeof(siginfo)) {
         switch (siginfo.ssi_signo) {
         case SIGINT:
-            if (onSigint) {
-                onSigint();
+            if (onSIGINT) {
+                onSIGINT();
             } else {
                 Warn() << "Handler for" << strsignal(siginfo.ssi_signo) << "signal is not set.";
             }

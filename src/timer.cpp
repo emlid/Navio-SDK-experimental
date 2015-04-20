@@ -27,6 +27,11 @@ Timer::~Timer()
     close(_fd);
 }
 
+const char* Timer::name()
+{
+    return "Timer";
+}
+
 int Timer::start(uint64_t interval)
 {
     timespec interval_spec;
