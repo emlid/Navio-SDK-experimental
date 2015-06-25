@@ -1,20 +1,24 @@
 #ifndef APPLICATION_H
 #define APPLICATION_H
 
-class EventPoller;
+class Poller;
+class Signal;
 
 class Application
 {
 public:
-    Application(int argc, char **argv);
+    Application();
     virtual ~Application();
 
-protected:
-    EventPoller *_event_poller;
+    int run(int argc, char **argv);
 
-    virtual void onStart();
-    virtual void onStop();
-    virtual void onSignal();
+protected:
+    Poller *_event_poller;
+    Signal *_signal;
+    int _exit_code;
+
+    virtual bool _onStart();
+    virtual bool _onQuit();
 };
 
 #endif // APPLICATION_H

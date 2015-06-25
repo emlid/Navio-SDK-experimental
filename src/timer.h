@@ -1,8 +1,8 @@
 #ifndef TIMER_H
 #define TIMER_H
 
-#include "eventpoller.h"
-#include "fdevent.h"
+#include "poller.h"
+#include "descriptor.h"
 #include <time.h>
 #include <stdint.h>
 #include <functional>
@@ -10,7 +10,7 @@
 /** Linux timerfd wrapper.
  *  Class provides event driven timers.
  */
-class Timer: public FDEvent
+class Timer: public Descriptor
 {
     enum State {
         Idle,
@@ -23,7 +23,7 @@ public:
     /** Timer constructor.
      * @param event_poller - EventPoller instance which will be used to process events.
      */
-    Timer(EventPoller *event_poller);
+    Timer(Poller *event_poller);
     Timer(const Timer& that) = delete;  /**< Copy contructor not allowed because of internal state and file descriptor. */
     virtual ~Timer();
 

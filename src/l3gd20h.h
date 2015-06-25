@@ -22,7 +22,7 @@
 #include <stdint.h>
 #include <functional>
 
-class EventPoller;
+class Poller;
 class I2C;
 class Timer;
 
@@ -38,7 +38,7 @@ public:
     std::function<void(float, float, float)> onData;
 
     L3GD20H();
-    L3GD20H(uint8_t address, I2C *bus, EventPoller *event_poller);
+    L3GD20H(uint8_t address, I2C *bus, Poller *event_poller);
     ~L3GD20H();
 
     int initialize();

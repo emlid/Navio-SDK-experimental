@@ -1,6 +1,6 @@
 #include "l3gd20h.h"
 
-#include "eventpoller.h"
+#include "poller.h"
 #include "timer.h"
 #include "i2c.h"
 #include "log.h"
@@ -74,11 +74,11 @@
 #define L3GD20H_AUTOINCREMENT           0x80
 
 L3GD20H::L3GD20H():
-    L3GD20H(L3GD20H_DEFAULT_ADDRESS, I2C::getDefault(), EventPoller::getDefault())
+    L3GD20H(L3GD20H_DEFAULT_ADDRESS, I2C::getDefault(), Poller::getDefault())
 {
 }
 
-L3GD20H::L3GD20H(uint8_t address, I2C *bus, EventPoller *event_poller):
+L3GD20H::L3GD20H(uint8_t address, I2C *bus, Poller *event_poller):
     _state(NotReady), _i2c(bus), _timer(new Timer(event_poller)),
     _address(address), _range(L3GD20H_RANGE_245)
 {
@@ -87,6 +87,7 @@ L3GD20H::L3GD20H(uint8_t address, I2C *bus, EventPoller *event_poller):
 
 L3GD20H::~L3GD20H()
 {
+    delete _timer; _timer = nullptr;
 }
 
 int L3GD20H::initialize()

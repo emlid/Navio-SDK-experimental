@@ -26,11 +26,11 @@
 
 
 BMP180::BMP180():
-    BMP180(BMP180_I2C_DEFAULT_ADDR, I2C::getDefault(), EventPoller::getDefault())
+    BMP180(BMP180_I2C_DEFAULT_ADDR, I2C::getDefault(), Poller::getDefault())
 {
 }
 
-BMP180::BMP180(uint8_t address, I2C *bus, EventPoller *event_poller):
+BMP180::BMP180(uint8_t address, I2C *bus, Poller *event_poller):
     _state(NotReady), _i2c(bus), _timer(new Timer(event_poller)),
     _address(address),  _id(0), _oversampling(BMP180_OVERSAMPLING_SINGLE),
     _ac1(0), _ac2(0), _ac3(0), _ac4(0), _ac5(0), _ac6(0),
@@ -71,7 +71,7 @@ BMP180::BMP180(uint8_t address, I2C *bus, EventPoller *event_poller):
                 if (onError) onError();
             }
             if (onTemperatureAndPressure) onTemperatureAndPressure(_temperature, _pressure);
-            _state = ReadingComboPressure;
+            _state = Ready;
         }
     };
 }
@@ -131,7 +131,7 @@ int BMP180::initialize()
 int BMP180::setOversampling(uint8_t ovesampling)
 {
     if (_state != Ready) {
-        Error() << "Unable to set oversampling, because state is Reading";
+        Error() << "Device is not ready";
         return -1;
     }
 
@@ -145,6 +145,11 @@ int BMP180::setOversampling(uint8_t ovesampling)
 
 int BMP180::getTemperature()
 {
+    if (_state != Ready) {
+        Error() << "Device is not ready";
+        return -1;
+    }
+
     if (_writeCommand(BMP180_COMMAND_TEMPERATURE) < 0) {
         Error() << "Unable to send temperature read command";
         return -1;
@@ -156,6 +161,11 @@ int BMP180::getTemperature()
 
 int BMP180::getTemperatureAndPressure()
 {
+    if (_state != Ready) {
+        Error() << "Device is not ready";
+        return -1;
+    }
+
     if (_writeCommand(BMP180_COMMAND_TEMPERATURE) < 0) {
         Error() << "Unable to send temperature read command";
         return -1;
@@ -167,8 +177,10 @@ int BMP180::getTemperatureAndPressure()
 
 void BMP180::reset()
 {
+    _timer->stop();
     uint8_t data = BMP180_SOFT_RESET_REF;
     _i2c->writeByte(_address, BMP180_SOFT_RESET_REG, &data);
+    _state = NotReady;
 }
 
 int BMP180::_readTemperatureADC()

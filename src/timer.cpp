@@ -8,23 +8,23 @@
 #include <errno.h>
 
 Timer::Timer():
-    Timer(EventPoller::getDefault())
+    Timer(Poller::getDefault())
 {
 
 }
 
-Timer::Timer(EventPoller *event_poller):
-    FDEvent(event_poller), _state(Idle)
+Timer::Timer(Poller *event_poller):
+    Descriptor(event_poller), _state(Idle)
 {
-    _fd = timerfd_create(CLOCK_MONOTONIC, TFD_NONBLOCK);
-    assert(_fd);
+    _descriptor = timerfd_create(CLOCK_MONOTONIC, TFD_NONBLOCK);
+    assert(_descriptor);
     _registerRead();
 }
 
 Timer::~Timer()
 {
     _unregisterRead();
-    close(_fd);
+    close(_descriptor);
 }
 
 const char* Timer::name()
@@ -65,7 +65,7 @@ int Timer::start(timespec timeout, timespec interval)
     spec.it_interval = interval;
     spec.it_value = timeout;
 
-    if (timerfd_settime(_fd, 0, &spec, nullptr) != 0) {
+    if (timerfd_settime(_descriptor, 0, &spec, nullptr) != 0) {
         Error() << "Error setting timer parameters. errno" << errno << strerror(errno);
         return -1;
     }
@@ -89,7 +89,7 @@ int Timer::stop()
     spec.it_interval = interval_spec;
     spec.it_value = timeout_spec;
 
-    if (timerfd_settime(_fd, 0, &spec, nullptr) != 0) {
+    if (timerfd_settime(_descriptor, 0, &spec, nullptr) != 0) {
         Error() << "Error setting timer parameters. errno" << errno << strerror(errno);
         return -1;
     }
@@ -101,7 +101,7 @@ int Timer::stop()
 void Timer::_onRead()
 {
     uint64_t expiration_count = 0;
-    if (read(_fd, &expiration_count, sizeof(uint64_t)) == sizeof(uint64_t)) {
+    if (read(_descriptor, &expiration_count, sizeof(uint64_t)) == sizeof(uint64_t)) {
         if (expiration_count > 1) {
             Warn() << this << expiration_count << "timeout events was coalesced. Check CPU usage and application logic.";
         }

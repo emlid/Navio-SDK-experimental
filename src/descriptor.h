@@ -1,26 +1,26 @@
-#ifndef FDEVENT_H
-#define FDEVENT_H
+#ifndef DESCRIPTOR_H
+#define DESCRIPTOR_H
 
-class EventPoller;
+class Poller;
 
 /** Abstract fd event.
  *  Class provides EventPoller interaction layer.
  */
-class FDEvent
+class Descriptor
 {
-    friend class EventPoller;
+    friend class Poller;
 public:
-    /** FD event constructor.
+    /** Descriptor constructor.
      * @param event_poller - EventPoller instance which will be used to process events.
      */
-    FDEvent(EventPoller *event_poller);
-    FDEvent(const FDEvent& that) = delete;  /**< Copy contructor not allowed because of the file descriptor. */
-    virtual ~FDEvent();
+    Descriptor(Poller *event_poller);
+    Descriptor(const Descriptor& that) = delete;  /**< Copy contructor is not allowed. */
+    virtual ~Descriptor();
     virtual const char* name()=0;
 
 protected:
-    EventPoller *_ep;   /**< Pointer to event poller. */
-    int _fd;            /**< file descriptor to poll. */
+    Poller *_ep;   /**< Pointer to event poller. */
+    int _descriptor;    /**< Descriptor that we will use for event polling. */
 
     /**
      * Register read callback on read event for fd.

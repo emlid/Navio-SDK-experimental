@@ -1,20 +1,20 @@
-#ifndef EVENTPOLLER_H
-#define EVENTPOLLER_H
+#ifndef POLLER_H
+#define POLLER_H
 
 #include <map>
 
-class FDEvent;
+class Descriptor;
 
 /** Linux epoll wrapper.
  *  Class provides event loop based on linux epoll.
  */
-class EventPoller
+class Poller
 {
-    friend class FDEvent;
+    friend class Descriptor;
 public:
-    EventPoller();
-    EventPoller(const EventPoller& that) = delete;  /**< Copy contructor not allowed because of the file descriptor. */
-    ~EventPoller();
+    Poller();
+    Poller(const Poller& that) = delete;  /**< Copy contructor not allowed because of the file descriptor. */
+    ~Poller();
 
     /** Run event loop.
      */
@@ -36,7 +36,7 @@ public:
     /** Get default event poller instance.
      * @return default event poller instance or nullptr.
      */
-    static EventPoller* getDefault();
+    static Poller* getDefault();
 
 private:
     float _epoll_mono_time;
@@ -46,14 +46,14 @@ private:
 
     int _fd;
     bool _run;
-    std::map<int, FDEvent*> _fd_read_pool;
-    std::map<int, FDEvent*> _fd_write_pool;
+    std::map<int, Descriptor*> _fd_read_pool;
+    std::map<int, Descriptor*> _fd_write_pool;
 
-    bool _registerFDRead(int fd, FDEvent *fd_event);
-    bool _registerFDWrite(int fd, FDEvent *fd_event);
+    bool _registerDescriptorRead(int fd, Descriptor *fd_event);
+    bool _registerDescriptorWrite(int fd, Descriptor *fd_event);
 
-    bool _unregisterFDRead(int fd);
-    bool _unregisterFDWrite(int fd);
+    bool _unregisterDescriptorRead(int fd);
+    bool _unregisterDescriptorWrite(int fd);
 };
 
 #endif

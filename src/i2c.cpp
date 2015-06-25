@@ -31,6 +31,7 @@ I2C::~I2C()
 
 int I2C::openDevice(const char *dev_path)
 {
+    assert(_fd == -1);
     Debug() << "Opening i2c dev" << dev_path;
     _fd = open(dev_path, O_RDWR);
     if (_fd < 0) {

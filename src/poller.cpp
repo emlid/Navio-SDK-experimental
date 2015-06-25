@@ -1,5 +1,5 @@
-#include "eventpoller.h"
-#include "fdevent.h"
+#include "poller.h"
+#include "descriptor.h"
 #include "log.h"
 
 #include <sys/epoll.h>
@@ -9,9 +9,9 @@
 #include <cassert>
 #include <errno.h>
 
-static EventPoller *_default_event_poller=nullptr;
+static Poller *_default_event_poller=nullptr;
 
-EventPoller::EventPoller():
+Poller::Poller():
     _epoll_mono_time(0), _callback_mono_time(0), _epoll_cpu_time(0), _callback_cpu_time(0),
     _fd(-1), _run(false),
     _fd_read_pool(), _fd_write_pool()
@@ -30,7 +30,7 @@ EventPoller::EventPoller():
     }
 }
 
-EventPoller::~EventPoller()
+Poller::~Poller()
 {
     if (!_fd_read_pool.empty()) {
         for (auto i=_fd_read_pool.begin(); i!=_fd_read_pool.end(); i++) {
@@ -44,7 +44,7 @@ EventPoller::~EventPoller()
     }
 }
 
-void EventPoller::loop()
+void Poller::loop()
 {
     int count;
     timespec a_mono_time, b_mono_time, c_mono_time, a_cpu_time, b_cpu_time, c_cpu_time;
@@ -84,12 +84,12 @@ void EventPoller::loop()
     }
 }
 
-void EventPoller::stop()
+void Poller::stop()
 {
     _run = false;
 }
 
-void EventPoller::getTimings(float &epoll_mono, float &callback_mono, float &epoll_cpu, float &callback_cpu)
+void Poller::getTimings(float &epoll_mono, float &callback_mono, float &epoll_cpu, float &callback_cpu)
 {
     epoll_mono = _epoll_mono_time;
     callback_mono = _callback_mono_time;
@@ -98,13 +98,13 @@ void EventPoller::getTimings(float &epoll_mono, float &callback_mono, float &epo
     _epoll_mono_time = _callback_mono_time = _epoll_cpu_time = _callback_cpu_time = 0;
 }
 
-EventPoller* EventPoller::getDefault()
+Poller* Poller::getDefault()
 {
     assert(_default_event_poller != nullptr);
     return _default_event_poller;
 }
 
-bool EventPoller::_registerFDRead(int fd, FDEvent *fd_event)
+bool Poller::_registerDescriptorRead(int fd, Descriptor *fd_event)
 {
     if (!_fd_read_pool.empty() && _fd_read_pool.count(fd)) {
         Error() << "Read event already registred. fd:" << fd;
@@ -124,7 +124,7 @@ bool EventPoller::_registerFDRead(int fd, FDEvent *fd_event)
     return true;
 }
 
-bool EventPoller::_registerFDWrite(int fd, FDEvent *fd_event)
+bool Poller::_registerDescriptorWrite(int fd, Descriptor *fd_event)
 {
     if (!_fd_write_pool.empty() && _fd_write_pool.count(fd)) {
         Error() << "Write event already registred. fd:" << fd;
@@ -143,7 +143,7 @@ bool EventPoller::_registerFDWrite(int fd, FDEvent *fd_event)
     return true;
 }
 
-bool EventPoller::_unregisterFDRead(int fd)
+bool Poller::_unregisterDescriptorRead(int fd)
 {
     if (_fd_read_pool.empty() || !_fd_read_pool.count(fd)) {
         Error() << "Read event not exists. fd:" << fd;
@@ -162,7 +162,7 @@ bool EventPoller::_unregisterFDRead(int fd)
     return true;
 }
 
-bool EventPoller::_unregisterFDWrite(int fd)
+bool Poller::_unregisterDescriptorWrite(int fd)
 {
     if (_fd_write_pool.empty() || !_fd_write_pool.count(fd)) {
         Error() << "Write event not exists. fd:" << fd;
