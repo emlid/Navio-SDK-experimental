@@ -84,7 +84,7 @@ BMP180::~BMP180()
 int BMP180::initialize()
 {
     // chip id check
-    if (_i2c->readByte(_address, BMP180_ID_REG, &_id) < 0) {
+    if (_i2c->readByte(_address, BMP180_ID_REG, _id) < 0) {
         Error() << "Unable to read device id";
         return -1;
     }
@@ -178,8 +178,7 @@ int BMP180::getTemperatureAndPressure()
 void BMP180::reset()
 {
     _timer->stop();
-    uint8_t data = BMP180_SOFT_RESET_REF;
-    _i2c->writeByte(_address, BMP180_SOFT_RESET_REG, &data);
+    _i2c->writeByte(_address, BMP180_SOFT_RESET_REG, BMP180_SOFT_RESET_REF);
     _state = NotReady;
 }
 
@@ -245,5 +244,5 @@ int BMP180::_readPressureADC()
 
 int BMP180::_writeCommand(uint8_t command)
 {
-    return _i2c->writeByte(_address, BMP180_CTRL_MEAS_REG, &command);
+    return _i2c->writeByte(_address, BMP180_CTRL_MEAS_REG, command);
 }

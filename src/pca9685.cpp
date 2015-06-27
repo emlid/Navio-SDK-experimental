@@ -52,27 +52,24 @@ int PCA9685::initialize(float ext_clock)
 {
     uint8_t data;
     if (ext_clock > 0) {
-        data = PCA9685_MODE1_FLAG_SLEEP;
-        if (_i2c->writeByte(_address, PCA9685_RA_PRE_SCALE, &data) < 0) {
+        if (_i2c->writeByte(_address, PCA9685_RA_PRE_SCALE, PCA9685_MODE1_FLAG_SLEEP) < 0) {
             Error() << "Can not put device into sleep mode, device communication error.";
             return -1;
         }
-        data = PCA9685_MODE1_FLAG_SLEEP | PCA9685_MODE1_FLAG_EXTCLK;
-        if (_i2c->writeByte(_address, PCA9685_RA_PRE_SCALE, &data) < 0) {
+        if (_i2c->writeByte(_address, PCA9685_RA_PRE_SCALE, PCA9685_MODE1_FLAG_SLEEP | PCA9685_MODE1_FLAG_EXTCLK) < 0) {
             Error() << "Can not set ext clock mode, device communication error.";
             return -1;
         }
         _clock = ext_clock;
     }
 
-    if (_i2c->readByte(_address, PCA9685_RA_PRE_SCALE, &data) < 0) {
+    if (_i2c->readByte(_address, PCA9685_RA_PRE_SCALE, data) < 0) {
         Error() << "Read pre-scale register failed.";
         return -1;
     }
     _frequency = _clock / 4096.f / (data + 1);
 
-    data = PCA9685_MODE1_FLAG_AI;
-    if (_i2c->writeByte(_address, PCA9685_RA_MODE1, &data) < 0) {
+    if (_i2c->writeByte(_address, PCA9685_RA_MODE1, PCA9685_MODE1_FLAG_AI) < 0) {
         Error() << "Can not finish initialization sequence, device communication error.";
         return -1;
     }
@@ -109,14 +106,14 @@ int PCA9685::setPrescale(float prescale)
 
     uint8_t prescale_data = prescale;
     uint8_t oldmode;
-    _i2c->readByte(_address, PCA9685_RA_MODE1, &oldmode);
+    _i2c->readByte(_address, PCA9685_RA_MODE1, oldmode);
 
     uint8_t newmode = (oldmode ^ PCA9685_MODE1_FLAG_RESTART) | PCA9685_MODE1_FLAG_SLEEP;
-    _i2c->writeByte(_address, PCA9685_RA_MODE1, &newmode);
-    _i2c->writeByte(_address, PCA9685_RA_PRE_SCALE, &prescale_data);
-    _i2c->writeByte(_address, PCA9685_RA_MODE1, &oldmode);
+    _i2c->writeByte(_address, PCA9685_RA_MODE1, newmode);
+    _i2c->writeByte(_address, PCA9685_RA_PRE_SCALE, prescale_data);
+    _i2c->writeByte(_address, PCA9685_RA_MODE1, oldmode);
     oldmode |= PCA9685_MODE1_FLAG_AI;
-    _i2c->writeByte(_address, PCA9685_RA_MODE1, &oldmode);
+    _i2c->writeByte(_address, PCA9685_RA_MODE1, oldmode);
 
     _frequency = _clock / 4096.f / (prescale + 1);
 

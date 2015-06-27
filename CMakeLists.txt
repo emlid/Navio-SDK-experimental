@@ -1,7 +1,7 @@
 cmake_minimum_required (VERSION 2.6)
 project(NavioSDK CXX)
 
-add_definitions("-Wall")
+add_definitions("-Wall -Os")
 
 if (CMAKE_COMPILER_IS_GNUCXX)
     EXECUTE_PROCESS(COMMAND ${CMAKE_CXX_COMPILER} "-dumpversion" OUTPUT_VARIABLE GCC_VERSION)

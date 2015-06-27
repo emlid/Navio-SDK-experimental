@@ -42,16 +42,25 @@ int I2C::openDevice(const char *dev_path)
     return 0;
 }
 
-int I2C::readByte(uint8_t device_address, uint8_t register_address, uint8_t *data)
+int I2C::readByte(const uint8_t device_address, const uint8_t register_address, uint8_t &data)
 {
-    return readBytes(device_address, register_address, 1, data);
+    i2c_msg read_reg[2]={
+        { device_address, I2C_M_WR, 1, const_cast<uint8_t*>(&register_address) },
+        { device_address, I2C_M_RD, 1, &data }
+    };
+
+    i2c_rdwr_ioctl_data messages;
+    messages.nmsgs = 2;
+    messages.msgs = read_reg;
+
+    return readWrite(messages);
 }
 
-int I2C::readBytes(uint8_t device_address, uint8_t register_address, uint8_t size, uint8_t *data)
+int I2C::readBytes(const uint8_t device_address, const uint8_t register_address, const uint8_t size, uint8_t data[])
 {
     assert(data != 0);
     i2c_msg read_reg[2]={
-        { device_address, I2C_M_WR, 1, &register_address },
+        { device_address, I2C_M_WR, 1, const_cast<uint8_t*>(&register_address) },
         { device_address, I2C_M_RD, size, data }
     };
 
@@ -62,12 +71,25 @@ int I2C::readBytes(uint8_t device_address, uint8_t register_address, uint8_t siz
     return readWrite(messages);
 }
 
-int I2C::writeByte(uint8_t device_address, uint8_t register_address, uint8_t *data)
+int I2C::writeByte(const uint8_t device_address, const uint8_t register_address, const uint8_t &data)
 {
-    return writeBytes(device_address, register_address, 1, data);
+    uint8_t r_data[2] = {
+        register_address,
+        data
+    };
+
+    i2c_msg message [1]= {
+        { device_address, I2C_M_WR, 2, r_data },
+    };
+
+    i2c_rdwr_ioctl_data messages;
+    messages.nmsgs = 1;
+    messages.msgs = message;
+
+    return readWrite(messages);
 }
 
-int I2C::writeBytes(uint8_t device_address, uint8_t register_address, uint8_t size, uint8_t *data)
+int I2C::writeBytes(const uint8_t device_address, const uint8_t register_address, const uint8_t size, const uint8_t data[])
 {
     assert(data != 0);
     if (size > 127) {
@@ -80,8 +102,21 @@ int I2C::writeBytes(uint8_t device_address, uint8_t register_address, uint8_t si
     r_data[0] = register_address;
     memcpy(r_data+1, data, size);
 
-    i2c_msg message [1]= {
+    i2c_msg message [] = {
         { device_address, I2C_M_WR, r_size, r_data },
+    };
+
+    i2c_rdwr_ioctl_data messages;
+    messages.nmsgs = 1;
+    messages.msgs = message;
+
+    return readWrite(messages);
+}
+
+int I2C::writeBatch(const uint8_t device_address, const uint8_t size, const uint8_t data[])
+{
+    i2c_msg message [] = {
+        { device_address, I2C_M_WR, size, const_cast<uint8_t*>(data) },
     };
 
     i2c_rdwr_ioctl_data messages;

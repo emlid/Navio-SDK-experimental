@@ -45,7 +45,7 @@ public:
      * @param data - data pointer
      * @return 0 on success or negative value on error
      */
-    int readByte(uint8_t device_address, uint8_t register_address, uint8_t *data);
+    int readByte(const uint8_t device_address, const uint8_t register_address, uint8_t &data);
 
     /** Read bytes from i2c device register.
      * @param device_address - i2c device address
@@ -54,24 +54,31 @@ public:
      * @param data - data pointer
      * @return 0 on success or negative value on error
      */
-    int readBytes(uint8_t device_address, uint8_t register_address, uint8_t size, uint8_t *data);
+    int readBytes(const uint8_t device_address, const uint8_t register_address, const uint8_t size, uint8_t data[]);
 
     /** Write bytes to the i2c device register.
      * @param device_address - i2c device address
      * @param register_address - i2c device register
-     * @param data - data pointer
+     * @param data - data catched by reference
      * @return 0 on success or negative value on error
      */
-    int writeByte(uint8_t device_address, uint8_t register_address, uint8_t *data);
+    int writeByte(const uint8_t device_address, const uint8_t register_address, const uint8_t &data);
 
     /** Write bytes to the i2c device register.
      * @param device_address - i2c device address
      * @param register_address - i2c device register
      * @param size - variable size
-     * @param data - data pointer
+     * @param data - data to write
      * @return 0 on success or negative value on error
      */
-    int writeBytes(uint8_t device_address, uint8_t register_address, uint8_t size, uint8_t *data);
+    int writeBytes(const uint8_t device_address, const uint8_t register_address, const uint8_t size, const uint8_t data[]);
+
+    /** Write to the i2c device register(one byte i2c message).
+     * @param device_address - i2c device address
+     * @param register_address - i2c device register
+     * @return 0 on success or negative value on error
+     */
+    int writeBatch(const uint8_t device_address, const uint8_t size, const uint8_t data[]);
 
     /** Send i2c messages bundle.
      * @param messages - i2c_rdwr_ioctl_data message pack. Read linux i2c documentation if you want to use it.

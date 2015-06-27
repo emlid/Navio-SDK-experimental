@@ -10,3 +10,6 @@ target_link_libraries(pca9685 libnavio)
 
 add_executable(l3gd20h l3gd20h.cpp)
 target_link_libraries(l3gd20h libnavio)
+
+add_executable(ssd1306 ssd1306.cpp)
+target_link_libraries(ssd1306 libnavio)

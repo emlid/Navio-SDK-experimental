@@ -92,14 +92,13 @@ L3GD20H::~L3GD20H()
 
 int L3GD20H::initialize()
 {
-    uint8_t data;
-    data = L3GD20H_LOW_ODR_FLAG_SW_RES;
-    if (_i2c->writeByte(_address, L3GD20H_RA_LOW_ODR, &data) < 0) {
+    if (_i2c->writeByte(_address, L3GD20H_RA_LOW_ODR, L3GD20H_LOW_ODR_FLAG_SW_RES) < 0) {
         Error() << "Unable to turn on device, device communication error";
         return -1;
     }
 
-    if (_i2c->readByte(_address, L3GD20H_RA_WHO_AM_I, &data) < 0) {
+    uint8_t data;
+    if (_i2c->readByte(_address, L3GD20H_RA_WHO_AM_I, data) < 0) {
         Error() << "Who am i check failed, device communication error";
         return -1;
     }
@@ -108,20 +107,17 @@ int L3GD20H::initialize()
         return -1;
     }
 
-    data = L3GD20H_CTRL1_FLAG_POWER_EN;
-    if (_i2c->writeByte(_address, L3GD20H_RA_CTRL1, &data) < 0) {
+    if (_i2c->writeByte(_address, L3GD20H_RA_CTRL1, L3GD20H_CTRL1_FLAG_POWER_EN) < 0) {
         Error() << "Unable to turn on device, device communication error";
         return -1;
     }
 
-    data = L3GD20H_CTRL5_FLAG_FIFO_EN;
-    if (_i2c->writeByte(_address, L3GD20H_RA_CTRL5, &data) < 0) {
+    if (_i2c->writeByte(_address, L3GD20H_RA_CTRL5, L3GD20H_CTRL5_FLAG_FIFO_EN) < 0) {
         Error() << "Unable to enable FIFO, device communication error";
         return -1;
     }
 
-    data = L3GD20H_FIFO_CTRL_MODE_DS << 5;
-    if (_i2c->writeByte(_address, L3GD20H_RA_FIFO_CTRL, &data) < 0) {
+    if (_i2c->writeByte(_address, L3GD20H_RA_FIFO_CTRL, L3GD20H_FIFO_CTRL_MODE_DS << 5) < 0) {
         Error() << "Unable to setup FIFO mode, device communication error";
         return -1;
     }
@@ -139,7 +135,7 @@ int L3GD20H::setRange(uint8_t range)
         Error() << "Invalid range" << range;
     }
     uint8_t data = range << 4;
-    if (_i2c->writeByte(_address, L3GD20H_RA_CTRL4, &data) < 0) {
+    if (_i2c->writeByte(_address, L3GD20H_RA_CTRL4, data) < 0) {
         Error() << "Unable to set range, device communication problem";;
     }
     _range = range;
@@ -166,7 +162,7 @@ int L3GD20H::start(uint8_t rate, uint8_t bandwidth)
             | L3GD20H_CTRL1_FLAG_Y_EN
             | L3GD20H_CTRL1_FLAG_Z_EN;
 
-    if (_i2c->writeByte(_address, L3GD20H_RA_CTRL1, &data) < 0) {
+    if (_i2c->writeByte(_address, L3GD20H_RA_CTRL1, data) < 0) {
         Error() << "Unable to start sampling";
         return -1;
     }
@@ -201,8 +197,7 @@ int L3GD20H::stop()
         return -1;
     }
 
-    uint8_t data = L3GD20H_CTRL1_FLAG_POWER_EN;
-    if (_i2c->writeByte(_address, L3GD20H_RA_CTRL1, &data) < 0) {
+    if (_i2c->writeByte(_address, L3GD20H_RA_CTRL1, L3GD20H_CTRL1_FLAG_POWER_EN) < 0) {
         Error() << "Unable to put device into sleep mode";
         return -1;
     }
@@ -216,7 +211,7 @@ int L3GD20H::stop()
 void L3GD20H::_readData()
 {
     uint8_t fifo;
-    if (_i2c->readByte(_address, L3GD20H_RA_FIFO_SRC, &fifo) < 0) {
+    if (_i2c->readByte(_address, L3GD20H_RA_FIFO_SRC, fifo) < 0) {
         Error() << "Unable to get fifo control data, device communication error";
         return;
     }
