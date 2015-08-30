@@ -44,7 +44,7 @@ protected:
         }
 
         Info() << "Initializing timers";
-        stats_timer.callback = [&]() {
+        stats_timer.onTimeout = [&]() {
             float epoll_mono, callback_mono, epoll_cpu, callback_cpu;
             _event_poller->getTimings(epoll_mono, callback_mono, epoll_cpu, callback_cpu);
             Info() << "Real Time: epoll" << epoll_mono << "callbacks" << callback_mono
@@ -56,7 +56,7 @@ protected:
         };
         stats_timer.start(5000);
 
-        l3gd20h_timer.callback = [&]() {
+        l3gd20h_timer.onTimeout = [&]() {
             Info() << "Gyroscope XYZ" << xa / gc << ya / gc << za / gc
                    << "samples: " << gc;
             xa = ya = za = 0;

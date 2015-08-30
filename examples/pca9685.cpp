@@ -36,7 +36,7 @@ protected:
         Info() << "PWM frequency is" << pwm.getFreqeuncy();
 
         Info() << "Initializing timers";
-        pwm_timer.callback = [&](){
+        pwm_timer.onTimeout = [&](){
             pwm_value += 2;
             pwm.setPWM(0, (powf((sinf(pwm_value * PI/180)+1)/2, 2)) * 4096);
             pwm.setPWM(1, (powf((sinf((pwm_value+45) * PI/180)+1)/2, 2)) * 4096);
@@ -46,7 +46,7 @@ protected:
         };
         pwm_timer.start(16);
 
-        stats_timer.callback = [&]() {
+        stats_timer.onTimeout = [&]() {
             float epoll_mono, callback_mono, epoll_cpu, callback_cpu;
             _event_poller->getTimings(epoll_mono, callback_mono, epoll_cpu, callback_cpu);
             Info() << "Real Time: epoll" << epoll_mono << "callbacks" << callback_mono

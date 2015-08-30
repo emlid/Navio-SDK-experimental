@@ -1,16 +1,16 @@
 #include <poller.h>
 #include <i2c.h>
+#include <ads1115.h>
 #include <timer.h>
 #include <log.h>
 #include <utils.h>
 #include <application.h>
-#include <ssd1306.h>
 
 class Main: public Application
 {
     I2C         i2c;
-    SSD1306     ssd1306;
-    Timer       ssd1306_timer, stats_timer;
+    ADS1115     ads1115;
+    Timer       stats_timer;
 
 protected:
     virtual bool _onStart() {
@@ -21,29 +21,13 @@ protected:
         }
 
         Info() << "Initializing sensors";
-        if (ssd1306.initialize() < 0) {
-            Error() << "Unable to initialize SSD1306";
+        if (ads1115.initialize() < 0) {
+            Error() << "Unable to initialize ADS1115";
             return false;
         }
-
-        ssd1306.clear();
-        ssd1306.drawText(0, 0, "Hello!", COLOR_WHITE, FONT_TERMINUS_v32n);
-        ssd1306.commit();
-
-        ssd1306_timer.onTimeout = [&]() {
-            ssd1306.clear();
-            time_t rawtime;
-            struct tm * timeinfo;
-            char buffer [256];
-
-            time(&rawtime);
-            timeinfo = localtime(&rawtime);
-            size_t size = strftime(buffer, 256, "%H:%M:%S\n%A\n%Y-%m-%d\n", timeinfo);
-
-            ssd1306.drawText(0, 0, std::string(buffer, size), COLOR_WHITE, FONT_TERMINUS_v22n);
-            ssd1306.commit();
+        ads1115.onData = [&](float value) {
+            Info() << "Voltage is" << value;
         };
-        ssd1306_timer.start(1000);
 
         stats_timer.onTimeout = [&]() {
             float epoll_mono, callback_mono, epoll_cpu, callback_cpu;
@@ -57,20 +41,18 @@ protected:
         };
         stats_timer.start(5000);
 
+        ads1115.startSampling(ADS1115::MS1G, ADS1115::G2048, ADS1115::SR8, false);
+
         return Application::_onStart();
     }
-
 
     virtual bool _onQuit() {
         Info() << "Cleanuping resources";
 
         stats_timer.stop();
-        ssd1306.clear();
-        ssd1306.commit();
 
         return Application::_onQuit();
     }
-
 };
 
 int main(int argc, char **argv) {

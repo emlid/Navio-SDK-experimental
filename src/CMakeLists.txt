@@ -15,6 +15,7 @@ set(libnavio_src
     l3gd20h.cpp
     lsm303dhlc.cpp
     ssd1306.cpp
+    ads1115.cpp
 )
 
 add_library(libnavio ${libnavio_src})

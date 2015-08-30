@@ -31,14 +31,14 @@ protected:
         };
 
         Info() << "Initializing timers";
-        bmp180_timer.callback = [&]() {
+        bmp180_timer.onTimeout = [&]() {
             if (bmp180.getTemperatureAndPressure()<0) {
                 Error() << "Unable to get temperature and pressure";
             }
         };
         bmp180_timer.start(1000);
 
-        stats_timer.callback = [&]() {
+        stats_timer.onTimeout = [&]() {
             float epoll_mono, callback_mono, epoll_cpu, callback_cpu;
             _event_poller->getTimings(epoll_mono, callback_mono, epoll_cpu, callback_cpu);
             Info() << "Real Time: epoll" << epoll_mono << "callbacks" << callback_mono

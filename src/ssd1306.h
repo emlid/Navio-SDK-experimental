@@ -49,15 +49,17 @@ public:
 
     int setInverted(bool inverted);
 
-    int refresh();
+    size_t width();
+    size_t height();
 
-    void fill();
+    int commit();
+
     void clear();
+    void fill();
+
     void drawPixel(uint8_t x, uint8_t y, uint8_t color=COLOR_WHITE);
     void drawLine(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, uint8_t color=COLOR_WHITE);
-    void drawBitmap(uint8_t x, uint8_t y, uint8_t w, uint8_t h, const uint8_t *bitmap, uint8_t color=COLOR_WHITE);
     void drawText(uint8_t x, uint8_t y, std::string text, uint8_t color=COLOR_WHITE, uint8_t font=FONT_TERMINUS_v12n);
-
     void drawText(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, std::string text,
                   uint8_t color=COLOR_WHITE, uint8_t font=FONT_TERMINUS_v12n);
 

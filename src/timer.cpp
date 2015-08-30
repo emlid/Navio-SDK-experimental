@@ -108,7 +108,7 @@ void Timer::_onRead()
 
         while (expiration_count > 0 && _state == Running) {
             expiration_count--;
-            callback();
+            onTimeout();
         }
     } else {
         Error() << "Incomplete timer data";

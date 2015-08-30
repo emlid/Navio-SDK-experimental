@@ -82,7 +82,7 @@ L3GD20H::L3GD20H(uint8_t address, I2C *bus, Poller *event_poller):
     _state(NotReady), _i2c(bus), _timer(new Timer(event_poller)),
     _address(address), _range(L3GD20H_RANGE_245)
 {
-    _timer->callback = std::bind(&L3GD20H::_readData, this);
+    _timer->onTimeout = std::bind(&L3GD20H::_readData, this);
 }
 
 L3GD20H::~L3GD20H()

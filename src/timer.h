@@ -30,7 +30,7 @@ public:
     virtual const char* name();
 
     /** User set callback. Will be called on timer timeout. */
-    std::function<void(void)> callback;
+    std::function<void(void)> onTimeout;
 
     /** Start timer.
      * @param interval - interval in msec.

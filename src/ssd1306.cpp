@@ -43,6 +43,8 @@
 #define SSD1306_EXTERNALVCC 0x1
 #define SSD1306_SWITCHCAPVCC 0x2
 
+#define SSD1306_TRANSACTION_SIZE 128
+
 SSD1306::SSD1306():
     SSD1306(SSD1306_I2C_ADDRESS, I2C::getDefault(), false)
 {
@@ -51,7 +53,7 @@ SSD1306::SSD1306():
 SSD1306::SSD1306(uint8_t address, I2C *bus, bool ext_vcc):
     _i2c(bus), _address(address), _ext_vcc(ext_vcc), _buffer(nullptr)
 {
-    _buffer = new uint8_t [128*64/8];
+    _buffer = new uint8_t [width()*height()/8];
 }
 
 SSD1306::~SSD1306()
@@ -108,13 +110,17 @@ int SSD1306::setInverted(bool inverted)
     return _sendCommand(inverted ? SSD1306_INVERTDISPLAY : SSD1306_NORMALDISPLAY);
 }
 
-int SSD1306::_sendCommand(uint8_t command)
+size_t SSD1306::width()
 {
-    uint8_t batch[] = { 0x00, command };
-    return _i2c->writeBatch(_address, sizeof(batch), batch);
+    return 128;
 }
-#define PAGE_SIZE 128
-int SSD1306::refresh()
+
+size_t SSD1306::height()
+{
+    return 64;
+}
+
+int SSD1306::commit()
 {
     _sendCommand(SSD1306_COLUMNADDR);
     _sendCommand(0);    // Column start address (0 = reset)
@@ -124,10 +130,10 @@ int SSD1306::refresh()
     _sendCommand(0);    // Page start address (0 = reset)
     _sendCommand(7);    // Page end address
 
-    uint8_t data[PAGE_SIZE+1];
-    for (uint16_t x=0; x < 128*64/8/PAGE_SIZE; x++) {
+    uint8_t data[SSD1306_TRANSACTION_SIZE+1];
+    for (size_t i=0; i < width()*height()/8/SSD1306_TRANSACTION_SIZE; i++) {
         data[0] = 0x40;
-        memcpy(data+1, _buffer+x*PAGE_SIZE, PAGE_SIZE);
+        memcpy(data+1, _buffer+i*SSD1306_TRANSACTION_SIZE, SSD1306_TRANSACTION_SIZE);
         _i2c->writeBatch(_address, sizeof(data), data);
     }
 
@@ -136,12 +142,12 @@ int SSD1306::refresh()
 
 void SSD1306::fill()
 {
-    memset(_buffer, 0xFF, 128*64/8);
+    memset(_buffer, 0xFF, width()*height()/8);
 }
 
 void SSD1306::clear()
 {
-    memset(_buffer, 0x00, 128*64/8);
+    memset(_buffer, 0x00, width()*height()/8);
 }
 
 void SSD1306::drawPixel(uint8_t x, uint8_t y, uint8_t color)
@@ -156,11 +162,11 @@ void SSD1306::drawPixel(uint8_t x, uint8_t y, uint8_t color)
     uint8_t segment = x;
 
     if (color == COLOR_WHITE) {
-        _buffer[page*128+segment] = _buffer[page*128+segment] | (1 << page_offset);
+        _buffer[page*width()+segment] = _buffer[page*width()+segment] | (1 << page_offset);
     } else if (color == COLOR_BLACK) {
-        _buffer[page*128+segment] = _buffer[page*128+segment] & ~(1 << page_offset);
+        _buffer[page*width()+segment] = _buffer[page*width()+segment] & ~(1 << page_offset);
     } else if (color == COLOR_INVERT) {
-        _buffer[page*128+segment] = _buffer[page*128+segment] ^ (1 << page_offset);
+        _buffer[page*width()+segment] = _buffer[page*width()+segment] ^ (1 << page_offset);
     }
 }
 
@@ -191,24 +197,6 @@ void SSD1306::drawLine(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, uint8_t c
     }
 }
 
-void SSD1306::drawBitmap(uint8_t x, uint8_t y, uint8_t w, uint8_t h, const uint8_t *bitmap, uint8_t color)
-{
-    if (w<1 || h<1) {
-        Warn() << "Invalid bitmap:" << w << h;
-        return;
-    }
-
-    for (uint8_t iw=0; iw<w; iw++) {
-        for (uint8_t ih=0; ih<h; ih++) {
-            size_t offset = ih * w / 8 + iw / 8;
-            uint8_t mask = 0b10000000 >> (iw % 8);
-            if (*(bitmap+offset) & mask) {
-                drawPixel(x+iw, y+ih, color);
-            }
-        }
-    }
-}
-
 void SSD1306::drawText(uint8_t x, uint8_t y, std::string text, uint8_t color, uint8_t font)
 {
     drawText(x, y, 127, 63, text, color, font);
@@ -222,19 +210,19 @@ void SSD1306::drawText(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, std::stri
     const uint8_t* psf_font = getFont(font);
     const uint32_t* header = reinterpret_cast<const uint32_t*>(psf_font);
 
-//    uint32_t magic          = header[0];
-//    uint32_t version        = header[1];
+    uint32_t magic          = header[0];
+    uint32_t version        = header[1];
     uint32_t header_size    = header[2];
-//    uint32_t flags          = header[3];
-//    uint32_t chars_count    = header[4];
+    uint32_t flags          = header[3];
+    uint32_t chars_count    = header[4];
     uint32_t char_length    = header[5];
     uint32_t char_height    = header[6];
     uint32_t char_width     = header[7];
 
-//    Debug() << "magic"          << magic        << "version"        << version
-//            << "header_size"    << header_size  << "flags"          << flags
-//            << "chars_count"    << chars_count  << "char_length"    << char_length
-//            << "char_height"    << char_height  << "char_width"     << char_width;
+    assert(magic == 0x864ab572);
+    assert(version == 0);
+    assert(flags == 0x1);
+    assert(chars_count > 255);
 
     psf_font += header_size;
 
@@ -247,14 +235,34 @@ void SSD1306::drawText(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, std::stri
         case '\n':
             pos += columns - pos % columns;
             continue;
+        case '\t':
+            pos += 2;
+            break;
         }
 
         uint16_t text_x = x1 + (pos % columns) * char_width;
         uint16_t text_y = y1 + (pos / columns) * char_height;
-        uint16_t real_width = char_width + (8 - char_width % 8);
+        uint16_t real_width = char_width + (8 - char_width % 8) % 8; // 8bit aligning
+        const uint8_t * font_char = psf_font + char_length * (*it);
 
-        if (text_y < y2) drawBitmap(text_x, text_y, real_width, char_height, psf_font+char_length*(*it), color);
+        if (text_y < y2) {
+            for (uint8_t ih=0; ih<char_height; ih++) {
+                for (uint8_t iw=0; iw<real_width; iw++) {
+                    size_t offset = ih * real_width / 8 + iw / 8;
+                    uint8_t probe_mask = 0b10000000 >> (iw % 8);
+                    if (*(font_char + offset) & probe_mask) {
+                        drawPixel(text_x + iw, text_y + ih, color);
+                    }
+                }
+            }
+        }
 
         pos++;
     }
+}
+
+int SSD1306::_sendCommand(uint8_t command)
+{
+    uint8_t batch[] = { 0x00, command };
+    return _i2c->writeBatch(_address, sizeof(batch), batch);
 }

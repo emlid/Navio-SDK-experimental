@@ -38,7 +38,7 @@ BMP180::BMP180(uint8_t address, I2C *bus, Poller *event_poller):
     _temperature(0), _pressure(0)
 {
     assert(_i2c != nullptr);
-    _timer->callback = [&]() {
+    _timer->onTimeout = [this]() {
         assert(_state != NotReady);
         assert(_state != Ready);
         if (_state == ReadingTemperature) {
