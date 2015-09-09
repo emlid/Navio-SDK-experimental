@@ -56,6 +56,13 @@ public:
      */
     int readBytes(const uint8_t device_address, const uint8_t register_address, const uint8_t size, uint8_t data[]);
 
+    /** Touch i2c device register.
+     * @param device_address - i2c device address
+     * @param register_address - i2c device register
+     * @return 0 on success or negative value on error
+     */
+    int write(const uint8_t device_address, const uint8_t register_address);
+
     /** Write bytes to the i2c device register.
      * @param device_address - i2c device address
      * @param register_address - i2c device register
@@ -73,9 +80,10 @@ public:
      */
     int writeBytes(const uint8_t device_address, const uint8_t register_address, const uint8_t size, const uint8_t data[]);
 
-    /** Write to the i2c device register(one byte i2c message).
+    /** Write data to device.
      * @param device_address - i2c device address
-     * @param register_address - i2c device register
+     * @param size - data array size
+     * @param data - data array
      * @return 0 on success or negative value on error
      */
     int writeBatch(const uint8_t device_address, const uint8_t size, const uint8_t data[]);

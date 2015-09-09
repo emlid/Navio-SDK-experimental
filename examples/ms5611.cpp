@@ -1,6 +1,7 @@
+
 #include <poller.h>
 #include <i2c.h>
-#include <ads1115.h>
+#include <ms5611.h>
 #include <timer.h>
 #include <log.h>
 #include <utils.h>
@@ -9,8 +10,8 @@
 class Main: public Application
 {
     I2C         i2c;
-    ADS1115     ads1115;
-    Timer       stats_timer;
+    MS5611      ms5611;
+    Timer       ms5611_timer, stats_timer;
 
 protected:
     virtual bool _onStart() {
@@ -21,13 +22,22 @@ protected:
         }
 
         Info() << "Initializing sensors";
-        if (ads1115.initialize() < 0) {
-            Error() << "Unable to initialize ADS1115";
+        if (ms5611.initialize() < 0) {
+            Error() << "Unable to initialize ms5611";
             return false;
         }
-        ads1115.onData = [&](float value) {
-            Info() << "Voltage is" << value;
+        ms5611.setOversampling(MS5611_OVERSAMPLING_4096);
+        ms5611.onTemperature = [&](float temperature, float pressure) {
+            Info() << "Temperature" << temperature << "Pressure" << pressure;
         };
+
+        Info() << "Initializing timers";
+        ms5611_timer.onTimeout = [&]() {
+            if (ms5611.getTemperatureAndPressure()<0) {
+                Error() << "Unable to get temperature and pressure";
+            }
+        };
+        ms5611_timer.start(1000);
 
         stats_timer.onTimeout = [&]() {
             float epoll_mono, callback_mono, epoll_cpu, callback_cpu;
@@ -41,8 +51,6 @@ protected:
         };
         stats_timer.start(5000);
 
-        ads1115.startSampling(ADS1115::MS0G, ADS1115::G2048, ADS1115::SR8, false);
-
         return Application::_onStart();
     }
 
@@ -50,9 +58,12 @@ protected:
         Info() << "Cleanuping resources";
 
         stats_timer.stop();
+        ms5611_timer.stop();
+        ms5611.reset();
 
         return Application::_onQuit();
     }
+
 };
 
 int main(int argc, char **argv) {

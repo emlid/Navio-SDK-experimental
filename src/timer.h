@@ -32,6 +32,12 @@ public:
     /** User set callback. Will be called on timer timeout. */
     std::function<void(void)> onTimeout;
 
+    /** Start one shot timer.
+     * @param timeout - interval in msec.
+     * @return 0 on success or negative value on error
+     */
+    int singleShot(uint64_t timeout);
+
     /** Start timer.
      * @param interval - interval in msec.
      * @return 0 on success or negative value on error

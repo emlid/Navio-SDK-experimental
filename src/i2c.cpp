@@ -71,6 +71,23 @@ int I2C::readBytes(const uint8_t device_address, const uint8_t register_address,
     return readWrite(messages);
 }
 
+int I2C::write(const uint8_t device_address, const uint8_t register_address)
+{
+    uint8_t r_data[1] = {
+        register_address
+    };
+
+    i2c_msg message [1]= {
+        { device_address, I2C_M_WR, 1, r_data },
+    };
+
+    i2c_rdwr_ioctl_data messages;
+    messages.nmsgs = 1;
+    messages.msgs = message;
+
+    return readWrite(messages);
+}
+
 int I2C::writeByte(const uint8_t device_address, const uint8_t register_address, const uint8_t &data)
 {
     uint8_t r_data[2] = {

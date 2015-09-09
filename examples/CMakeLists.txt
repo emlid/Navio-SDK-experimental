@@ -16,3 +16,6 @@ target_link_libraries(ssd1306 libnavio)
 
 add_executable(ads1115 ads1115.cpp)
 target_link_libraries(ads1115 libnavio)
+
+add_executable(ms5611 ms5611.cpp)
+target_link_libraries(ms5611 libnavio)

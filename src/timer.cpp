@@ -6,6 +6,7 @@
 #include <string.h>
 #include <cassert>
 #include <errno.h>
+#include <cmath>
 
 Timer::Timer():
     Timer(Poller::getDefault())
@@ -30,6 +31,19 @@ Timer::~Timer()
 const char* Timer::name()
 {
     return "Timer";
+}
+
+int Timer::singleShot(uint64_t timeout)
+{
+    timespec timeout_spec;
+    timeout_spec.tv_sec = timeout / 1000;
+    timeout_spec.tv_nsec = timeout % 1000 * 1000000;
+
+    timespec interval_spec;
+    interval_spec.tv_sec = 0;
+    interval_spec.tv_nsec = 0;
+
+    return start(timeout_spec, interval_spec);
 }
 
 int Timer::start(uint64_t interval)

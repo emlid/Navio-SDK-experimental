@@ -64,7 +64,7 @@ BMP180::BMP180(uint8_t address, I2C *bus, Poller *event_poller):
                 return;
             }
             _state = ReadingComboPressure;
-            _timer->start(46, 0);
+            _timer->singleShot(46);
         } else if (_state == ReadingComboPressure) {
             if (_readPressureADC() < 0) {
                 Error() << "_readPressureADC error";
@@ -155,7 +155,7 @@ int BMP180::getTemperature()
         return -1;
     }
     _state = ReadingTemperature;
-    _timer->start(5, 0);
+    _timer->singleShot(5);
     return 0;
 }
 
@@ -171,7 +171,7 @@ int BMP180::getTemperatureAndPressure()
         return -1;
     }
     _state = ReadingComboTemperature;
-    _timer->start(5, 0);
+    _timer->singleShot(5);
     return 0;
 }
 
