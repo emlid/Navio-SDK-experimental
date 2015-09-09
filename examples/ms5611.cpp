@@ -27,7 +27,7 @@ protected:
             return false;
         }
         ms5611.setOversampling(MS5611_OVERSAMPLING_4096);
-        ms5611.onTemperature = [&](float temperature, float pressure) {
+        ms5611.onTemperatureAndPressure = [&](float temperature, float pressure) {
             Info() << "Temperature" << temperature << "Pressure" << pressure;
         };
 
