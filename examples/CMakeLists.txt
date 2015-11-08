@@ -19,3 +19,6 @@ target_link_libraries(ads1115 libnavio)
 
 add_executable(ms5611 ms5611.cpp)
 target_link_libraries(ms5611 libnavio)
+
+add_executable(vz89 vz89.cpp)
+target_link_libraries(vz89 libnavio)
